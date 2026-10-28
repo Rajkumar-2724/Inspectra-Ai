@@ -21,3 +21,11 @@ models:
     file: pcb1/patchcore_pcb1_v1.onnx
     product: "PCB Controller Board"
     assign: true
+  - name: classifier-pcb1
+    version: "1.0"
+    type: classifier
+    format: onnx
+    file: pcb1/classifier_pcb1_v1.onnx
+    product: "PCB Controller Board"
+    assign: true
+

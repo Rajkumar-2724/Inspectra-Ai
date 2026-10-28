@@ -17,17 +17,19 @@ def pcb_product(client, admin):
 
     db = SessionLocal()
     p = db.execute(select(Product).where(Product.name == "PCB Controller Board")).scalar_one_or_none()
+    verified_classes = ["bent", "melt", "missing", "scratch"]
     if not p:
         p = Product(name="PCB Controller Board", category="Electronics", review_threshold=0.40, fail_threshold=0.70)
-        p.defect_classes = [
-            ProductDefectClass(name="scratch"),
-            ProductDefectClass(name="missing_component"),
-            ProductDefectClass(name="burnt"),
-            ProductDefectClass(name="solder_bridge"),
-        ]
+        p.defect_classes = [ProductDefectClass(name=n) for n in verified_classes]
         db.add(p)
         db.commit()
         db.refresh(p)
+    else:
+        current_names = [c.name for c in p.defect_classes]
+        if set(current_names) != set(verified_classes):
+            p.defect_classes = [ProductDefectClass(name=n) for n in verified_classes]
+            db.commit()
+            db.refresh(p)
 
     test_models = _tmp / "models"
     test_models.mkdir(parents=True, exist_ok=True)
@@ -35,11 +37,14 @@ def pcb_product(client, admin):
     repo_models = Path.cwd().parent / "models"
     real_onnx = repo_models / "pcb1" / "patchcore_pcb1_v1.onnx"
     real_meta = repo_models / "pcb1" / "patchcore_pcb1_v1.meta.json"
+    real_clf_onnx = repo_models / "pcb1" / "classifier_pcb1_v1.onnx"
+    real_clf_meta = repo_models / "pcb1" / "classifier_pcb1_v1.meta.json"
     
+    import shutil
+    pcb_dir = test_models / "pcb1"
+    pcb_dir.mkdir(parents=True, exist_ok=True)
+
     if real_onnx.is_file() and real_meta.is_file():
-        import shutil
-        pcb_dir = test_models / "pcb1"
-        pcb_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy(real_onnx, pcb_dir / "patchcore_pcb1_v1.onnx")
         shutil.copy(real_meta, pcb_dir / "patchcore_pcb1_v1.meta.json")
         onnx_file_name = "pcb1/patchcore_pcb1_v1.onnx"
@@ -48,7 +53,7 @@ def pcb_product(client, admin):
         make_onnx_model(test_models / "pcb1_patchcore.onnx", size=512)
         onnx_file_name = "pcb1_patchcore.onnx"
 
-    # Register in DB
+    # Register PatchCore model in DB
     m = db.execute(select(ModelVersion).where(ModelVersion.name == "patchcore-pcb1", ModelVersion.version == "1.0")).scalar_one_or_none()
     if not m:
         m = ModelVersion(
@@ -65,6 +70,27 @@ def pcb_product(client, admin):
     m.product_id = p.id
     registry.validate_and_store(db, m)
     p.patchcore_model_id = m.id
+
+    # Register MobileNetV3 Classifier model in DB if available
+    if real_clf_onnx.is_file() and real_clf_meta.is_file():
+        shutil.copy(real_clf_onnx, pcb_dir / "classifier_pcb1_v1.onnx")
+        shutil.copy(real_clf_meta, pcb_dir / "classifier_pcb1_v1.meta.json")
+        m_clf = db.execute(select(ModelVersion).where(ModelVersion.name == "classifier-pcb1", ModelVersion.version == "1.0")).scalar_one_or_none()
+        if not m_clf:
+            m_clf = ModelVersion(
+                name="classifier-pcb1",
+                version="1.0",
+                model_type="classifier",
+                format="onnx",
+                file_path="pcb1/classifier_pcb1_v1.onnx",
+                product_id=p.id
+            )
+            db.add(m_clf)
+            db.flush()
+        m_clf.product_id = p.id
+        registry.validate_and_store(db, m_clf)
+        p.classifier_model_id = m_clf.id
+
     db.commit()
     pid = p.id
     db.close()
@@ -82,6 +108,7 @@ def test_pcb_product_and_defect_classes(client, inspector, pcb_product):
     assert pcb["review_threshold"] == 0.40
     assert pcb["fail_threshold"] == 0.70
     assert pcb["real_mode_ready"] is True
+    assert set(pcb["defect_classes"]) == {"bent", "melt", "missing", "scratch"}
 
 
 def test_pcb_model_readiness(client, inspector, pcb_product):
@@ -140,14 +167,23 @@ def test_pcb_real_mode_inference(client, admin, inspector, pcb_product):
     r_def = client.post("/api/inspect", headers=inspector, files=files_def, data=form_def)
     assert r_def.status_code == 201, r_def.text
     insp_def = r_def.json()
-    expl_def = insp_def.get("explanation", {})
 
     assert insp_def["mode"] == "real"
     assert insp_def["product_name"] == "PCB Controller Board"
     assert insp_def["decision"] in ("FAIL", "REVIEW")
     assert insp_def["score"] >= 0.40
     # Must have detected defect regions
-    assert len(insp_def.get("defects", [])) >= 1
+    defects = insp_def.get("defects", [])
+    assert len(defects) >= 1
+
+    # Stage 2 defect classification assertions
+    assert insp_def["defect_class"] in ("bent", "melt", "missing", "scratch", "unclassified_anomaly")
+    if insp_def["confidence"] is not None:
+        assert 0.0 <= insp_def["confidence"] <= 1.0
+    for d in defects:
+        assert d["label"] in ("bent", "melt", "missing", "scratch", "unclassified_anomaly")
+        if d.get("confidence") is not None:
+            assert 0.0 <= d["confidence"] <= 1.0
 
     # 3. Verify cryptographic audit chain remains valid
     r_audit = client.get("/api/audit/verify", headers=admin)
