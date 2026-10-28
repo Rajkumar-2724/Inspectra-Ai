@@ -1,0 +1,23 @@
+# Optional. Usage:  copy .env.docker.example to .env  then  docker compose up --build
+# Frontend http://localhost:5173   Backend http://localhost:8000/docs
+services:
+  backend:
+    build: ./backend
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env (32+ chars)}
+      DATABASE_URL: sqlite:////data/inspection.db      # swap for postgresql+psycopg://... in production
+      STORAGE_DIR: /data/storage
+      MODELS_DIR: /models
+      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    volumes: ["avis-data:/data", "./models:/models:ro"]
+    ports: ["8000:8000"]
+  frontend:
+    build:
+      context: ./frontend
+      args: { VITE_API_URL: http://localhost:8000 }
+    ports: ["5173:80"]
+    depends_on: [backend]
+volumes:
+  avis-data:

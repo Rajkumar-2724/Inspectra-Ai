@@ -1,0 +1,18 @@
+# Copy to models/registry.yaml, edit, then run (from backend/):  python -m app.scripts.register_models
+# Paths are relative to this models/ directory. Each artifact needs a sidecar "<file stem>.meta.json".
+# Nothing here is a trained model; these entries are TEMPLATES.
+models:
+  - name: patchcore-pcb
+    version: "1.0"
+    type: patchcore          # patchcore | classifier
+    format: onnx             # onnx | torchscript
+    file: pcb/patchcore_pcb_v1.onnx
+    product: "PCB Controller Board"   # must exist; models only run for the product they are registered to
+    assign: true
+  - name: defect-classifier-pcb
+    version: "1.0"
+    type: classifier
+    format: onnx
+    file: pcb/classifier_pcb_v1.onnx
+    product: "PCB Controller Board"
+    assign: true

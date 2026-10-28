@@ -1,0 +1,8 @@
+# OPTIONAL: only needed to TRAIN / EXPORT models or to load TorchScript artifacts.
+# Not required for ONNX inference, demo mode, or any other feature.
+-r requirements.txt
+torch==2.5.1
+torchvision==0.20.1
+anomalib==1.2.0
+albumentations==1.4.21
+onnx==1.17.0

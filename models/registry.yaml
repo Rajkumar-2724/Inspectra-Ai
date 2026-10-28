@@ -1,0 +1,23 @@
+# Industrial Visual Inspection Model Registry
+models:
+  - name: patchcore-metal-nut
+    version: "1.0"
+    type: patchcore
+    format: onnx
+    file: metal_nut/patchcore_metal_nut_v1.onnx
+    product: "Metal Nut"
+    assign: true
+  - name: patchcore-paper
+    version: "1.0"
+    type: patchcore
+    format: onnx
+    file: paper/paper_patchcore_v1.onnx
+    product: "Plain Paper"
+    assign: true
+  - name: patchcore-pcb1
+    version: "1.0"
+    type: patchcore
+    format: onnx
+    file: pcb1/patchcore_pcb1_v1.onnx
+    product: "PCB Controller Board"
+    assign: true

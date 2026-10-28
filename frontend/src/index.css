@@ -1,0 +1,171 @@
+@import "@fontsource-variable/sora";
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  @apply bg-ink-950 text-slate-200 font-sans antialiased selection:bg-sky-500/30 selection:text-white;
+}
+
+h1, h2, h3, .font-display {
+  font-family: "Sora Variable", system-ui, sans-serif;
+}
+
+/* ------------------------------------------------------------------ */
+/* Professional Industrial Workstation Field Backdrop                 */
+/* Clean, subtle technical grid with dark slate matte base            */
+/* ------------------------------------------------------------------ */
+.bg-field {
+  background-color: #070c18;
+  background-image:
+    /* Technical millimeter inspection grid */
+    linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+    /* Major grid division lines */
+    linear-gradient(rgba(14, 165, 233, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.025) 1px, transparent 1px),
+    /* Subtle industrial vignette */
+    radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.04), transparent 70%);
+  background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px, 100% 100%;
+  background-position: 0 0, 0 0, 0 0, 0 0, center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Professional High-Fidelity Glassmorphism Design System            */
+/* ------------------------------------------------------------------ */
+.glass {
+  background: rgba(11, 20, 42, 0.62);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.875rem;
+  box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+.glass:hover {
+  border-color: rgba(56, 189, 248, 0.38);
+  box-shadow:
+    0 12px 38px 0 rgba(0, 0, 0, 0.46),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.24),
+    0 0 20px -2px rgba(14, 165, 233, 0.18);
+}
+
+.glass-solid {
+  background: rgba(10, 18, 38, 0.88);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.875rem;
+  box-shadow:
+    0 24px 60px 0 rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.22);
+}
+
+/* Industrial Crosshair Reticle for Visual Workstation */
+.inspection-reticle {
+  position: relative;
+}
+.inspection-reticle::before,
+.inspection-reticle::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
+.inspection-reticle::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.4) 30%, rgba(14, 165, 233, 0.4) 70%, transparent);
+}
+.inspection-reticle::after {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(14, 165, 233, 0.4) 30%, rgba(14, 165, 233, 0.4) 70%, transparent);
+}
+
+@layer components {
+  /* Precision Industrial Buttons with Frosted Glass */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-medium tracking-wide transition active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-primary {
+    @apply btn bg-sky-600/90 text-white hover:bg-sky-500 shadow-md shadow-sky-950/60 border border-sky-400/40 font-semibold backdrop-blur-sm;
+  }
+  .btn-ghost {
+    @apply btn border border-white/15 bg-white/[0.06] text-slate-200 hover:bg-white/[0.12] hover:text-white hover:border-white/25 backdrop-blur-md;
+  }
+  .btn-danger {
+    @apply btn border border-fail/40 bg-fail/15 text-red-200 hover:bg-fail/25 backdrop-blur-sm;
+  }
+  .btn-success {
+    @apply btn border border-pass/40 bg-pass/15 text-emerald-200 hover:bg-pass/25 backdrop-blur-sm;
+  }
+  .btn-warning {
+    @apply btn border border-review/40 bg-review/15 text-amber-200 hover:bg-review/25 backdrop-blur-sm;
+  }
+
+  /* Industrial Precision Form Inputs with Glassmorphic Translucency */
+  .input {
+    @apply w-full rounded-lg border border-white/15 bg-slate-950/60 px-3 py-1.5 text-xs text-white placeholder:text-slate-400 transition focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400/50 backdrop-blur-md;
+  }
+  .input option {
+    background-color: #0b1326;
+    color: #f1f5f9;
+  }
+  .label {
+    @apply mb-1 block text-[11px] font-semibold tracking-wider text-slate-300 uppercase;
+  }
+
+  /* Compact High-Density Table Styles */
+  .th {
+    @apply px-3 py-2 text-left text-[11px] font-semibold tracking-wider text-slate-300 uppercase border-b border-white/15 bg-slate-950/60 backdrop-blur-md;
+  }
+  .td {
+    @apply px-3 py-2.5 text-xs text-slate-100 border-b border-white/5;
+  }
+
+  /* Industrial Status Badges */
+  .badge-pass {
+    @apply inline-flex items-center gap-1 rounded border border-pass/50 bg-pass/20 px-2 py-0.5 text-xs font-semibold text-emerald-300 tracking-wide backdrop-blur-sm shadow-[0_0_8px_rgba(16,185,129,0.15)];
+  }
+  .badge-review {
+    @apply inline-flex items-center gap-1 rounded border border-review/50 bg-review/20 px-2 py-0.5 text-xs font-semibold text-amber-300 tracking-wide backdrop-blur-sm shadow-[0_0_8px_rgba(245,158,11,0.15)];
+  }
+  .badge-fail {
+    @apply inline-flex items-center gap-1 rounded border border-fail/50 bg-fail/20 px-2 py-0.5 text-xs font-semibold text-red-300 tracking-wide backdrop-blur-sm shadow-[0_0_8px_rgba(239,68,68,0.15)];
+  }
+}
+
+/* Precision Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(7, 12, 24, 0.4);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.45);
+}
